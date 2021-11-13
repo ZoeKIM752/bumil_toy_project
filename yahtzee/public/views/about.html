@@ -7,24 +7,47 @@
   <title>웹소켓 테스트</title>
 </head>
 <body>
-  <input type="text" id="userId">
-  <button type="button" onclick="sendM()">가입</button>
+  <div>
+    <input type="text" id="userId">
+    <button type="button" onclick="sendM(1)">가입</button>
+  </div>
+
+  <div>
+    <input type="text" id="message">
+    <button type="button" onclick="sendM(2)">전송</button>
+  </div>
+
+  <div id="msg"></div>
 </body>
 <script>
   const webSocket = new WebSocket("ws://localhost:3008");
   webSocket.onopen = function () {
       console.log('서버와 웹 소켓 연결됨');
-      webSocket.send('123');
   };
   webSocket.onmessage = function (event) {
-      console.log(event.data);
+      try {
+        var parseJson = JSON.parse(event.data);
+        console.log(parseJson.id);
+      } catch {
+        console.log(event.data);
+      }
+      var d = document.getElementById('msg');
+      var p = document.createElement('p');
+      p.innerText = event.data;
+      d.appendChild(p);
       // webSocket.send('클라이언트에서 서버로 답장을 보냅니다.');
   }
   
-  sendM = () => {
+  sendM = (i) => {
     data = {};
-    data.type = "createId";
-    data.content = document.getElementById('userId').value;
+    if(i == 1) {
+      data.type = "createId";
+      data.content = document.getElementById('userId').value;
+    }
+    else {
+      data.type = "message";
+      data.content = document.getElementById('message').value;
+    }
     data = JSON.stringify(data);
     webSocket.send(data);
   }
